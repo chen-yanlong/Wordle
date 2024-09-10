@@ -106,8 +106,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.key').forEach(keyElement => {
       const letter = keyElement.textContent.toLowerCase().trim(); // Use textContent to match key
 
-      console.log(`Processing Key: '${letter}'`);
-
       // Remove all existing color classes
       keyElement.classList.remove('correct', 'present', 'absent', 'incorrect');
       
@@ -124,6 +122,9 @@ document.addEventListener('DOMContentLoaded', function() {
   function createGameBoard(wordLength) {
     const board = document.getElementById('game-board');
     board.innerHTML = '';  // Clear previous content
+
+    // Dynamically set the column size based on the word length
+    board.style.gridTemplateColumns = `repeat(${wordLength}, 50px)`;
 
     // Create 6 rows, each with `wordLength` number of cells
     for (let row = 0; row < 6; row++) {
