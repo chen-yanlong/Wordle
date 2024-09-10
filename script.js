@@ -1,92 +1,143 @@
-// Submit the custom word (index.html)
+let currentGuess = ''; // Store the current guess
+let currentRow = 0;    // Track the current row of guesses
+const letterColors = {}; // Track the highest priority color for each letter
+
 document.addEventListener('DOMContentLoaded', function() {
-  const submitWordButton = document.getElementById('submit-word');
   const submitGuessButton = document.getElementById('submit-guess');
+  const keyboard = document.getElementById('keyboard');
+  const inputField = document.getElementById('guess-input');
+  const backspace = document.getElementById('backspace');
 
-  // If we are on the word input page
-  if (submitWordButton) {
-    submitWordButton.addEventListener('click', function() {
-      const customWord = document.getElementById('custom-word-input').value.toLowerCase();
+  // Retrieve the target word from localStorage
+  const targetWord = localStorage.getItem('wordleWord')?.toLowerCase();
 
-      if (customWord.length === 0) {
-        displayMessage('Please enter a valid word.');
-        return;
-      }
-
-      // Store the word in localStorage
-      localStorage.setItem('wordleWord', customWord);
-
-      // Navigate to the guess page
-      window.location.href = 'guess.html';
-    });
+  if (!targetWord) {
+    displayMessage('No word found. Please enter a word first.');
+    return;
   }
 
-  // If we are on the guessing page (guess.html)
-  if (submitGuessButton) {
-    const targetWord = localStorage.getItem('wordleWord');
-    let currentRow = 0;
+  // Dynamically create the game board based on the word length
+  createGameBoard(targetWord.length);
 
-    if (!targetWord) {
-      displayMessage('No word found. Please enter a word first.');
+  // Handle keyboard clicks
+  keyboard.addEventListener('click', function(e) {
+    if (e.target.classList.contains('key') && !e.target.id) {
+      addLetterToGuess(e.target.textContent);
+    }
+  });
+
+  // Handle backspace click
+  backspace.addEventListener('click', function() {
+    removeLetterFromGuess();
+  });
+
+  // Submit guess button
+  submitGuessButton.addEventListener('click', function() {
+    if (currentGuess.length !== targetWord.length) {
+      alert(`Please enter a word with exactly ${targetWord.length} letters.`);
       return;
     }
 
-    // Dynamically create the game board based on the word length
-    createGameBoard(targetWord.length);
+    processGuess(currentGuess, targetWord); // Update both the board and keyboard
+    currentGuess = ''; // Reset the guess for the next row
+  });
 
-    submitGuessButton.addEventListener('click', function() {
-      const guess = document.getElementById('guess-input').value.toLowerCase();
+  // Add letter to guess
+  function addLetterToGuess(letter) {
+    if (currentGuess.length < targetWord.length) {
+      currentGuess += letter.toLowerCase();
+      inputField.value = currentGuess;
+    }
+  }
 
-      if (guess.length !== targetWord.length) {
-        alert(`Please enter a word with exactly ${targetWord.length} letters.`);
-        return;
-      }
+  // Remove letter from guess (backspace)
+  function removeLetterFromGuess() {
+    currentGuess = currentGuess.slice(0, -1);
+    inputField.value = currentGuess;
+  }
 
-      if (currentRow >= 6) {
-        displayMessage('Game Over! No more guesses!');
-        return;
-      }
-
-      for (let i = 0; i < guess.length; i++) {
-        const cell = document.getElementById(`cell-${currentRow * targetWord.length + i}`);
-        cell.textContent = guess[i];
-
-        if (guess[i] === targetWord[i]) {
-          cell.classList.add('correct');
-        } else if (targetWord.includes(guess[i])) {
-          cell.classList.add('present');
-        } else {
-          cell.classList.add('absent');
+  function processGuess(guess, targetWord) {
+    const boardRow = document.querySelectorAll(`#game-board div.row-${currentRow}`);
+    const keyColors = {}; // Track the best color for each key
+    const incorrectLetters = new Set(); // Track incorrect letters
+    
+    // First pass to mark cells and track incorrect letters
+    for (let i = 0; i < guess.length; i++) {
+      const cell = boardRow[i];
+      const letter = guess[i];
+      
+      cell.textContent = letter;
+  
+      if (letter === targetWord[i]) {
+        cell.classList.add('correct');
+        keyColors[letter] = 'correct'; // Highest priority color
+      } else if (targetWord.includes(letter)) {
+        if (!keyColors[letter]) {
+          keyColors[letter] = 'present'; // Set to present if it's not correct
         }
+        cell.classList.add('present');
+      } else {
+        if (!keyColors[letter]) {
+          keyColors[letter] = 'incorrect'; // Lowest priority color
+          incorrectLetters.add(letter); // Track incorrect letters
+        }
+        cell.classList.add('absent');
       }
-
-      if (guess === targetWord) {
-        displayMessage('Congratulations! You guessed the word!');
-      } else if (currentRow === 5) {
-        displayMessage(`Game Over! The word was ${targetWord}`);
+    }
+  
+    // Update the global letterColors with the highest priority colors
+    for (const [letter, color] of Object.entries(keyColors)) {
+      letterColors[letter] = color;
+    }
+    for (const letter of incorrectLetters) {
+      if (!letterColors[letter]) {
+        letterColors[letter] = 'incorrect'; // Ensure incorrect letters are marked
       }
+    }
+  
+    // After processing the row, update the keyboard colors
+    updateKeyboardColors();
+  
+    currentRow++;  // Move to the next row for the next guess
+    inputField.value = ''; // Clear the input field
+  }
+  
+  function updateKeyboardColors() {
+    document.querySelectorAll('.key').forEach(keyElement => {
+      const letter = keyElement.textContent.toLowerCase().trim(); // Use textContent to match key
 
-      currentRow++;
-      document.getElementById('guess-input').value = '';
+      console.log(`Processing Key: '${letter}'`);
+
+      // Remove all existing color classes
+      keyElement.classList.remove('correct', 'present', 'absent', 'incorrect');
+      
+      // Apply the color based on letterColors
+      if (letterColors[letter]) {
+        keyElement.classList.add(letterColors[letter]);
+      } else {
+        keyElement.classList.add('absent'); // Apply 'absent' if not in `letterColors`
+      }
     });
   }
-});
 
-// Utility function to create the game board dynamically
-function createGameBoard(wordLength) {
-  const board = document.getElementById('game-board');
-  board.innerHTML = '';
-  board.style.gridTemplateColumns = `repeat(${wordLength}, 50px)`;
+  // Utility function to create the game board dynamically
+  function createGameBoard(wordLength) {
+    const board = document.getElementById('game-board');
+    board.innerHTML = '';  // Clear previous content
 
-  for (let i = 0; i < wordLength * 6; i++) {
-    const cell = document.createElement('div');
-    cell.id = `cell-${i}`;
-    board.appendChild(cell);
+    // Create 6 rows, each with `wordLength` number of cells
+    for (let row = 0; row < 6; row++) {
+      for (let col = 0; col < wordLength; col++) {
+        const cell = document.createElement('div');
+        cell.classList.add(`row-${row}`);
+        board.appendChild(cell);
+      }
+    }
   }
-}
 
-// Utility function to display messages
-function displayMessage(msg) {
-  const messageDiv = document.getElementById('message');
-  messageDiv.textContent = msg;
-}
+  // Utility function to display messages
+  function displayMessage(msg) {
+    const messageDiv = document.getElementById('message');
+    messageDiv.textContent = msg;
+  }
+});

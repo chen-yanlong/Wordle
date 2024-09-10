@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Wordle Clone - Enter a Word</title>
+  <title>Wordle - Enter a Word</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -16,6 +16,25 @@
     <div id="message"></div>
   </div>
 
-  <script src="script.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const submitButton = document.getElementById('submit-word');
+      const inputField = document.getElementById('custom-word-input');
+      const messageDiv = document.getElementById('message');
+
+      submitButton.addEventListener('click', function() {
+        const word = inputField.value.trim().toLowerCase();
+
+        if (word === '') {
+          messageDiv.textContent = 'Please enter a valid word.';
+          return;
+        }
+
+        // Store the word in localStorage and redirect to guess.html
+        localStorage.setItem('wordleWord', word);
+        window.location.href = 'guess.html';
+      });
+    });
+  </script>
 </body>
 </html>

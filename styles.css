@@ -1,44 +1,44 @@
+/* General styles */
 * {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
 body {
   font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  margin: 0;
-  background-color: #f4f4f4;
 }
 
 .game-container {
   text-align: center;
   width: 100%;
-  max-width: 600px; /* Limits width for larger screens */
+  max-width: 600px;
   padding: 20px;
 }
 
 #game-board {
   display: grid;
-  grid-gap: 5px; /* Reduced gap for smaller screens */
+  grid-gap: 5px;
   margin-bottom: 20px;
+  grid-template-columns: repeat(5, 50px); /* Adjust based on word length */
+  justify-content: center;
 }
 
 #game-board div {
-  width: 40px; /* Smaller width for smaller screens */
-  height: 40px; /* Smaller height for smaller screens */
+  width: 50px;
+  height: 50px;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 18px; /* Smaller font size for smaller screens */
+  font-size: 20px;
   border: 2px solid #ccc;
   background-color: #fff;
-  transition: background-color 0.3s ease;
 }
 
+/* Status colors for the board */
 .correct {
   background-color: green !important;
   color: white !important;
@@ -54,50 +54,46 @@ body {
   color: white !important;
 }
 
-.input-section {
+/* Keyboard styles */
+#keyboard {
   margin-top: 20px;
 }
 
-input, button {
-  padding: 10px;
-  font-size: 16px;
+.keyboard-row {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 5px;
 }
 
-input {
-  width: 100%; /* Full width for input */
-  max-width: 300px; /* Limits the maximum width */
-  margin-bottom: 10px;
-}
-
-button {
-  margin-left: 0; /* Adjust margin for mobile */
-  width: 100%; /* Full width for button */
-  max-width: 150px; /* Limits the maximum width */
-  cursor: pointer;
-  border: none;
-  background-color: #4CAF50;
+.key {
+  width: 40px;
+  height: 40px;
+  margin: 2px;
+  background-color: grey; /* Default color */
   color: white;
-  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 18px;
 }
 
-button:hover {
-  background-color: #45a049;
+/* Status colors for the keyboard */
+.key.correct {
+  background-color: green !important;
 }
 
-/* Responsive Styles */
-@media (max-width: 600px) {
-  #game-board {
-    grid-template-columns: repeat(auto-fit, minmax(40px, 1fr)); /* Responsive grid */
-  }
+.key.present {
+  background-color: rgb(253, 192, 8) !important;
+}
 
-  #game-board div {
-    width: 40px;
-    height: 40px;
-    font-size: 16px; /* Adjust font size for smaller screens */
-  }
+.key.incorrect {
+  background-color: rgb(45, 41, 41) !important; /* Dark grey for letters guessed but incorrect */
+}
 
-  input, button {
-    font-size: 14px; /* Smaller font size for mobile devices */
-    padding: 8px; /* Adjust padding for smaller screens */
-  }
+#backspace {
+  width: 80px;
+  background-color: darkred;
+  color: white;
 }
